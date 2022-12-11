@@ -1,4 +1,4 @@
-const file = await Deno.readTextFile("test.txt");
+const file = await Deno.readTextFile("input.txt");
 const data = file.split("\n\n");
 
 type Monkey = {
@@ -71,9 +71,6 @@ const parseMonkey = (data: string[]): Monkey[] => {
 
 const monkeys = parseMonkey(data);
 
-// Part 1:
-// Round 1
-
 const isDivisibleBy = (number: number, divisor: number) => {
   return number % divisor === 0;
 };
@@ -94,36 +91,46 @@ const roundWorryLevel = (worryLevel: number): number => {
   return Math.floor(worryLevel / 3);
 };
 
-const round = (monkeys: Monkey[]) => {
+const round = (
+  monkeys: Monkey[],
+  options?: {
+    divisor?: boolean;
+  }
+) => {
+  const divisibleBy = monkeys
+    .map((m) => m.testDivisibleBy)
+    .reduce((p, c) => p * c, 1);
+
   for (let i = 0; i < monkeys.length; i++) {
     const monkey = monkeys[i];
     const lengthStartingItems = monkey.startingItems.length;
 
     for (let j = 0; j < lengthStartingItems; j++) {
-      let worryLevel = monkey.startingItems[j];
+      let newWorryLevel = monkey.startingItems[j];
 
       if (monkey.operations.type === "add") {
         if (monkey.operations.value === "old") {
-          worryLevel += worryLevel;
-        }
-        if (typeof monkey.operations.value === "number") {
-          worryLevel = worryLevel + monkey.operations.value;
+          newWorryLevel += newWorryLevel;
+        } else {
+          newWorryLevel += monkey.operations.value;
         }
       } else if (monkey.operations.type === "multiply") {
         if (monkey.operations.value === "old") {
-          worryLevel = worryLevel * worryLevel;
-        }
-        if (typeof monkey.operations.value === "number") {
-          worryLevel = worryLevel * monkey.operations.value;
+          newWorryLevel *= newWorryLevel;
+        } else {
+          newWorryLevel *= monkey.operations.value;
         }
       }
-      worryLevel = roundWorryLevel(worryLevel);
 
-      if (isDivisibleBy(worryLevel, monkey.testDivisibleBy)) {
-        throwToMonkey(monkeys, monkey.passTest, worryLevel);
+      newWorryLevel = options?.divisor
+        ? newWorryLevel % divisibleBy
+        : roundWorryLevel(newWorryLevel);
+
+      if (isDivisibleBy(newWorryLevel, monkey.testDivisibleBy)) {
+        throwToMonkey(monkeys, monkey.passTest, newWorryLevel);
         monkeyInspect(monkey);
       } else {
-        throwToMonkey(monkeys, monkey.failTest, worryLevel);
+        throwToMonkey(monkeys, monkey.failTest, newWorryLevel);
         monkeyInspect(monkey);
       }
     }
@@ -132,18 +139,35 @@ const round = (monkeys: Monkey[]) => {
   return monkeys;
 };
 
-let result;
+const part1 = (rounds: number, monkeys: Monkey[]): number => {
+  let result;
+  for (let i = 0; i < rounds; i++) {
+    result = round(monkeys, { divisor: false });
+  }
+  return result
+    ?.filter((monkey) => monkey.inspectNumber)
+    .sort((a, b) => b.inspectNumber - a.inspectNumber)
+    .slice(0, 2)
+    .reduce((acc, cur) => {
+      return acc * cur.inspectNumber;
+    }, 1) as number;
+};
 
-for (let i = 0; i < 20; i++) {
-  result = round(monkeys);
-}
+const part2 = (rounds: number, monkeys: Monkey[]): number => {
+  let result;
 
-const finalResult = result
-  ?.filter((monkey) => monkey.inspectNumber)
-  .sort((a, b) => b.inspectNumber - a.inspectNumber)
-  .slice(0, 2)
-  .reduce((acc, cur) => {
-    return acc * cur.inspectNumber;
-  }, 1);
+  for (let i = 0; i < rounds; i++) {
+    result = round(monkeys, { divisor: true });
+  }
 
-console.log("Two most inspected monkeys multiplied: ", finalResult);
+  return result
+    ?.filter((monkey) => monkey.inspectNumber)
+    .sort((a, b) => b.inspectNumber - a.inspectNumber)
+    .slice(0, 2)
+    .reduce((acc, cur) => {
+      return acc * cur.inspectNumber;
+    }, 1) as number;
+};
+
+// console.log("Two most inspected monkeys multiplied: ", part1(20, monkeys));
+console.log("Two most inspected monkeys multiplied: ", part2(10000, monkeys));
