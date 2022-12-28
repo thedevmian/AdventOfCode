@@ -43,6 +43,7 @@ Initial arrangement:
 4 moves between -3 and 0:
 1, 2, -3, 4, 0, 3, -2
 
+
 Then, the grove coordinates can be found by looking at the 1000th, 2000th, and 3000th numbers after the value 0, wrapping around the list as necessary.
 In the above example,
 
@@ -55,30 +56,258 @@ adding these together produces 3.
 */
 
 const sequence = file.split("\n").map(Number);
+// let dataCloned = [...sequence];
+// const dataWithIndex = sequence.map((val, index) => ({ val, index }));
 
-class Node {
-  value: number;
-  next: Node | undefined;
+// const normalizeMoveToIndex = (moveToIndex, maxSize) => {
+//   if (Math.abs(moveToIndex) / maxSize >= 1) {
+//     const remainder = moveToIndex % maxSize;
 
-  constructor(value: number) {
-    this.value = value;
+//     return remainder;
+//   }
+
+//   return moveToIndex;
+// };
+
+// for (let i = 0; i < sequence.length; i++) {
+//   const leftPart = [...dataCloned.slice(0, dataWithIndex[i].index)];
+//   const rightPart = [...dataCloned.slice(dataWithIndex[i].index + 1)];
+//   const elementToMove = dataWithIndex[i];
+
+//   let moveToIndex = elementToMove.val + elementToMove.index;
+
+//   moveToIndex = normalizeMoveToIndex(moveToIndex, dataWithIndex.length);
+
+//   if (moveToIndex === elementToMove.index) {
+//     continue;
+//   }
+
+//   if (moveToIndex <= 0) {
+//     moveToIndex =
+//       dataWithIndex.length + (moveToIndex % dataWithIndex.length) - 1;
+//   } else if (moveToIndex >= dataWithIndex.length) {
+//     moveToIndex = -(moveToIndex - (moveToIndex % dataWithIndex.length));
+//   }
+
+//   let newLeftPart = [];
+//   let newRightPart = [];
+
+//   if (moveToIndex > elementToMove.index) {
+//     newLeftPart = [
+//       ...leftPart,
+//       ...rightPart.slice(0, moveToIndex - elementToMove.index),
+//     ];
+//     newRightPart = [...rightPart].slice(moveToIndex - elementToMove.index);
+//   } else {
+//     newLeftPart = [...leftPart.slice(0, moveToIndex + 1)];
+//     newRightPart = [...leftPart.slice(moveToIndex + 1), ...rightPart];
+//   }
+
+//   const newArray = [...newLeftPart, elementToMove.val, ...newRightPart];
+
+//   dataCloned = newArray;
+
+//   if (moveToIndex > dataWithIndex[i].index) {
+//     dataWithIndex
+//       .filter(
+//         (x) => x.index >= dataWithIndex[i].index && x.index <= moveToIndex
+//       )
+//       .forEach((x) => x.index--);
+//   } else {
+//     dataWithIndex
+//       .filter(
+//         (x) => x.index <= dataWithIndex[i].index && x.index >= moveToIndex
+//       )
+//       .forEach((x) => x.index++);
+//   }
+
+//   dataWithIndex[i].index = moveToIndex;
+// }
+
+// const zerothElementIndex = dataCloned.indexOf(0);
+
+// console.log("zerothElementIndex", zerothElementIndex);
+
+// const elementAtPosition = (startIndex, position, data) => {
+//   if (startIndex + position > data.length) {
+//     position = (startIndex + position) % data.length;
+//   }
+
+//   return data[position];
+// };
+
+// const firstElement = elementAtPosition(zerothElementIndex, 1000, dataCloned);
+// const secondElement = elementAtPosition(zerothElementIndex, 2000, dataCloned);
+// const thirdElement = elementAtPosition(zerothElementIndex, 3000, dataCloned);
+
+// console.log("1000th element", firstElement);
+// console.log("2000th element", secondElement);
+// console.log("3000th element", thirdElement);
+
+// console.log(firstElement + secondElement + thirdElement);
+// const dataWithIndex = sequence.map((val, index) => ({ val, index }));
+
+// console.log(dataWithIndex);
+
+class CircularArray<T> {
+  private array: T[];
+  private iterateArray: T[] = [];
+  private index: number;
+
+  constructor(array: T[]) {
+    this.array = array;
+    this.iterateArray = [];
+    this.index = 0;
   }
-}
 
-class LinkedList {
-  head: Node;
-  array: number[] = [];
+  get all() {
+    return this.array;
+  }
 
-  constructor(sequence: number[]) {
-    this.head = new Node(sequence[0]);
-    let current = this.head;
-    for (let i = 1; i < sequence.length; i++) {
-      current.next = new Node(sequence[i]);
-      current = current.next;
+  get currentIterate() {
+    return this.iterateArray;
+  }
+
+  set provideNewIterate(array: T[]) {
+    this.iterateArray = [...array];
+  }
+  set currentArray(array: T[]) {
+    this.array = array;
+  }
+
+  moveForwardBy(value: number) {
+    const index = this.array.indexOf(value);
+    this.index = index;
+
+    for (let i = 0; i < value; i++) {
+      if (this.index === 0 && value - i > 0) {
+        this.moveOneStepForward();
+      }
+
+      this.moveOneStepForward();
     }
-    current.next = this.head;
+
+    return this.array;
+  }
+
+  moveBackwardBy(value: number) {
+    const index = this.array.indexOf(value);
+
+    this.index = index;
+
+    for (let i = 0; i <= -1 * value; i++) {
+      // if (this.index === 0) {
+      //   i++;
+      // }
+
+      this.moveOneStepBackward();
+    }
+
+    return this.array;
+  }
+
+  moveOneStepForward() {
+    if (this.index === this.array.length - 1) {
+      this.array.unshift(this.array.pop());
+    } else {
+      this.array.splice(
+        this.index,
+        2,
+        this.array[this.index + 1],
+        this.array[this.index]
+      );
+    }
+
+    this.index = (this.index + 1) % this.array.length;
+  }
+
+  moveOneStepBackward() {
+    if (this.index === 0) {
+      this.array.push(this.array.shift());
+    } else {
+      this.array.splice(
+        this.index - 1,
+        2,
+        this.array[this.index],
+        this.array[this.index - 1]
+      );
+    }
+
+    this.index = (this.index - 1 + this.array.length) % this.array.length;
+  }
+
+  // changeIndexBy(value: number) {
+  //   if (value > 0) {
+  //     console.log("value", value);
+  //     this.array
+  //   } else {
+  //     this.index = (this.index + value + this.array.length) % this.array.length;
+  //   }
+  // }
+  get isDuplicate() {
+    const set = new Set(this.array);
+    return set.size !== this.array.length;
   }
 }
-const linkedList = new LinkedList(sequence);
 
-console.log(linkedList.array);
+const loop = () => {
+  const circularArray = new CircularArray(sequence);
+
+  circularArray.provideNewIterate = circularArray.all;
+  const tempArray = circularArray.currentIterate;
+  // console.log(circularArray.isDuplicate);
+
+  tempArray.forEach((value, i) => {
+    // console.log("value", value);
+    if (value > 0) {
+      circularArray.moveForwardBy(value);
+      // console.log("forward", circularArray.all);
+    } else if (value < 0) {
+      circularArray.moveBackwardBy(value);
+      // console.log("back", circularArray.all);
+    }
+  });
+  //   circularArray.changeIndexBy(value);
+  // });
+  // console.log(circularArray.all);
+  return circularArray.all;
+};
+
+let result;
+
+for (let i = 1; i <= 3000; i++) {
+  result = loop();
+  // console.log(i);
+  if (i === 1000 || i === 2000 || i === 3000) {
+    console.log(result);
+  }
+  // console.log(i);
+}
+
+// console.log(loop());
+// 1, 2, -3, 4, 0, 3, -2
+
+// 1
+// 2, 1, -3, 4, 0, 3, -2
+
+// 2
+// 1, -3, 2, 4, 0, 3, -2
+
+// -3, 1, 2, 4, 0, 3, -2
+// 1, 2, 4, 0, 3, -2, -3
+// 1, 2, 4, 0, 3, -3, -2
+// 1, 2, 4, 0, -3, 3, -2
+// -3
+// 1, 2, 4, 0, -3, 3, -2
+
+// 4
+// 1, 2, 0, -3, 3, -2, 4
+
+// 0
+// 1, 2, 0, -3, 3, -2, 4
+
+// 3
+// 1, 3, 2, 0, -3, -2, 4
+
+// -2
+// 1, 3, 2,-2, 0, -3, 4
