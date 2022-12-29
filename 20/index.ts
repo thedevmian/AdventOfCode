@@ -56,258 +56,103 @@ adding these together produces 3.
 */
 
 const sequence = file.split("\n").map(Number);
-// let dataCloned = [...sequence];
-// const dataWithIndex = sequence.map((val, index) => ({ val, index }));
 
-// const normalizeMoveToIndex = (moveToIndex, maxSize) => {
-//   if (Math.abs(moveToIndex) / maxSize >= 1) {
-//     const remainder = moveToIndex % maxSize;
+// class CircularList<T> {
+//   private length = 0;
 
-//     return remainder;
+//   public get count() {
+//     return this.length;
 //   }
 
-//   return moveToIndex;
-// };
-
-// for (let i = 0; i < sequence.length; i++) {
-//   const leftPart = [...dataCloned.slice(0, dataWithIndex[i].index)];
-//   const rightPart = [...dataCloned.slice(dataWithIndex[i].index + 1)];
-//   const elementToMove = dataWithIndex[i];
-
-//   let moveToIndex = elementToMove.val + elementToMove.index;
-
-//   moveToIndex = normalizeMoveToIndex(moveToIndex, dataWithIndex.length);
-
-//   if (moveToIndex === elementToMove.index) {
-//     continue;
+//   public init(value: T): Node<T> {
+//     const node = new Node(value);
+//     node.next = node;
+//     node.prev = node;
+//     this.length = 1;
+//     return node;
 //   }
 
-//   if (moveToIndex <= 0) {
-//     moveToIndex =
-//       dataWithIndex.length + (moveToIndex % dataWithIndex.length) - 1;
-//   } else if (moveToIndex >= dataWithIndex.length) {
-//     moveToIndex = -(moveToIndex - (moveToIndex % dataWithIndex.length));
-//   }
+//   public insertAfter(node: Node<T>, value: T): Node<T> {
 
-//   let newLeftPart = [];
-//   let newRightPart = [];
-
-//   if (moveToIndex > elementToMove.index) {
-//     newLeftPart = [
-//       ...leftPart,
-//       ...rightPart.slice(0, moveToIndex - elementToMove.index),
-//     ];
-//     newRightPart = [...rightPart].slice(moveToIndex - elementToMove.index);
-//   } else {
-//     newLeftPart = [...leftPart.slice(0, moveToIndex + 1)];
-//     newRightPart = [...leftPart.slice(moveToIndex + 1), ...rightPart];
-//   }
-
-//   const newArray = [...newLeftPart, elementToMove.val, ...newRightPart];
-
-//   dataCloned = newArray;
-
-//   if (moveToIndex > dataWithIndex[i].index) {
-//     dataWithIndex
-//       .filter(
-//         (x) => x.index >= dataWithIndex[i].index && x.index <= moveToIndex
-//       )
-//       .forEach((x) => x.index--);
-//   } else {
-//     dataWithIndex
-//       .filter(
-//         (x) => x.index <= dataWithIndex[i].index && x.index >= moveToIndex
-//       )
-//       .forEach((x) => x.index++);
-//   }
-
-//   dataWithIndex[i].index = moveToIndex;
 // }
 
-// const zerothElementIndex = dataCloned.indexOf(0);
+class Node {
+  value: number;
+  next: Node | null = null;
+  prev: Node | null = null;
+  origNext: Node | null = null;
 
-// console.log("zerothElementIndex", zerothElementIndex);
-
-// const elementAtPosition = (startIndex, position, data) => {
-//   if (startIndex + position > data.length) {
-//     position = (startIndex + position) % data.length;
-//   }
-
-//   return data[position];
-// };
-
-// const firstElement = elementAtPosition(zerothElementIndex, 1000, dataCloned);
-// const secondElement = elementAtPosition(zerothElementIndex, 2000, dataCloned);
-// const thirdElement = elementAtPosition(zerothElementIndex, 3000, dataCloned);
-
-// console.log("1000th element", firstElement);
-// console.log("2000th element", secondElement);
-// console.log("3000th element", thirdElement);
-
-// console.log(firstElement + secondElement + thirdElement);
-// const dataWithIndex = sequence.map((val, index) => ({ val, index }));
-
-// console.log(dataWithIndex);
-
-class CircularArray<T> {
-  private array: T[];
-  private iterateArray: T[] = [];
-  private index: number;
-
-  constructor(array: T[]) {
-    this.array = array;
-    this.iterateArray = [];
-    this.index = 0;
-  }
-
-  get all() {
-    return this.array;
-  }
-
-  get currentIterate() {
-    return this.iterateArray;
-  }
-
-  set provideNewIterate(array: T[]) {
-    this.iterateArray = [...array];
-  }
-  set currentArray(array: T[]) {
-    this.array = array;
-  }
-
-  moveForwardBy(value: number) {
-    const index = this.array.indexOf(value);
-    this.index = index;
-
-    for (let i = 0; i < value; i++) {
-      if (this.index === 0 && value - i > 0) {
-        this.moveOneStepForward();
-      }
-
-      this.moveOneStepForward();
-    }
-
-    return this.array;
-  }
-
-  moveBackwardBy(value: number) {
-    const index = this.array.indexOf(value);
-
-    this.index = index;
-
-    for (let i = 0; i <= -1 * value; i++) {
-      // if (this.index === 0) {
-      //   i++;
-      // }
-
-      this.moveOneStepBackward();
-    }
-
-    return this.array;
-  }
-
-  moveOneStepForward() {
-    if (this.index === this.array.length - 1) {
-      this.array.unshift(this.array.pop());
-    } else {
-      this.array.splice(
-        this.index,
-        2,
-        this.array[this.index + 1],
-        this.array[this.index]
-      );
-    }
-
-    this.index = (this.index + 1) % this.array.length;
-  }
-
-  moveOneStepBackward() {
-    if (this.index === 0) {
-      this.array.push(this.array.shift());
-    } else {
-      this.array.splice(
-        this.index - 1,
-        2,
-        this.array[this.index],
-        this.array[this.index - 1]
-      );
-    }
-
-    this.index = (this.index - 1 + this.array.length) % this.array.length;
-  }
-
-  // changeIndexBy(value: number) {
-  //   if (value > 0) {
-  //     console.log("value", value);
-  //     this.array
-  //   } else {
-  //     this.index = (this.index + value + this.array.length) % this.array.length;
-  //   }
-  // }
-  get isDuplicate() {
-    const set = new Set(this.array);
-    return set.size !== this.array.length;
+  constructor(value: number) {
+    this.value = value * 811589153;
+    this.next = this;
+    this.prev = this;
+    this.origNext = this;
   }
 }
 
-const loop = () => {
-  const circularArray = new CircularArray(sequence);
+const nodes = sequence.map((value) => new Node(value));
 
-  circularArray.provideNewIterate = circularArray.all;
-  const tempArray = circularArray.currentIterate;
-  // console.log(circularArray.isDuplicate);
-
-  tempArray.forEach((value, i) => {
-    // console.log("value", value);
-    if (value > 0) {
-      circularArray.moveForwardBy(value);
-      // console.log("forward", circularArray.all);
-    } else if (value < 0) {
-      circularArray.moveBackwardBy(value);
-      // console.log("back", circularArray.all);
-    }
-  });
-  //   circularArray.changeIndexBy(value);
-  // });
-  // console.log(circularArray.all);
-  return circularArray.all;
+const getStartNode = (node: Node): Node => {
+  let current = node;
+  while (current.value !== 0) {
+    current = current.next!;
+  }
+  return current;
 };
 
-let result;
-
-for (let i = 1; i <= 3000; i++) {
-  result = loop();
-  // console.log(i);
-  if (i === 1000 || i === 2000 || i === 3000) {
-    console.log(result);
+const getNthValue = (node: Node, n: number): number => {
+  let current = node;
+  for (let i = 0; i < n; i++) {
+    current = current.next!;
   }
-  // console.log(i);
+  return current.value;
+};
+
+for (let i = 1; i < nodes.length; i++) {
+  nodes[i - 1].next = nodes[i];
+  nodes[i].prev = nodes[i - 1];
+
+  nodes[i - 1].origNext = nodes[i];
 }
 
-// console.log(loop());
-// 1, 2, -3, 4, 0, 3, -2
+// Set the last node to point to the first node
+nodes[nodes.length - 1].next = nodes[0];
+nodes[nodes.length - 1].origNext = nodes[0];
+nodes[0].prev = nodes[nodes.length - 1];
 
-// 1
-// 2, 1, -3, 4, 0, 3, -2
+const listStart = nodes[0];
 
-// 2
-// 1, -3, 2, 4, 0, 3, -2
+let curr = listStart;
+do {
+  if (curr.value === 0) {
+    curr = curr.origNext;
+    continue;
+  }
 
-// -3, 1, 2, 4, 0, 3, -2
-// 1, 2, 4, 0, 3, -2, -3
-// 1, 2, 4, 0, 3, -3, -2
-// 1, 2, 4, 0, -3, 3, -2
-// -3
-// 1, 2, 4, 0, -3, 3, -2
+  curr.prev.next = curr.next;
+  curr.next.prev = curr.prev;
 
-// 4
-// 1, 2, 0, -3, 3, -2, 4
+  let newPrev = curr;
+  for (let i = 0; i < Math.abs(curr.value); i++) {
+    if (curr.value < 0) newPrev = newPrev.prev;
+    else newPrev = newPrev.next;
+  }
+  if (curr.value < 0) newPrev = newPrev.prev;
 
-// 0
-// 1, 2, 0, -3, 3, -2, 4
+  curr.next = newPrev.next;
+  curr.prev = newPrev;
+  curr.next.prev = curr;
+  curr.prev.next = curr;
 
-// 3
-// 1, 3, 2, 0, -3, -2, 4
+  curr = curr.origNext;
+} while (curr != listStart);
 
-// -2
-// 1, 3, 2,-2, 0, -3, 4
+const zero = getStartNode(nodes[0]);
+
+const result = [
+  getNthValue(zero, 1000),
+  getNthValue(zero, 2000),
+  getNthValue(zero, 3000),
+].reduce((a, b) => a + b);
+
+console.log(result);
