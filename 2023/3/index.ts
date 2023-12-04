@@ -1,4 +1,4 @@
-const file = await Deno.readTextFile('./test.txt');
+const file = await Deno.readTextFile('./data.txt');
 const dataStream = file.split('\n');
 
 
@@ -20,21 +20,16 @@ const numbers = dataStream.map((row) => {
 const data = dataStream.map((row) => {
     const addDot = "." + row + ".";
     return addDot.split('');
-    // row.split('');
 }
 )
 
-
 data.unshift(Array(data[0].length).fill('.'));
 data.push(Array(data[0].length).fill('.'));
-
 numbers.unshift(Array(numbers[0].length).fill(null));
 numbers.push(Array(numbers[0].length).fill(null));
 
 
-// console.log(data);
 // Part 1
-
 let sum: number = 0;
 
 for (let i = 0; i < numbers.length; i++) {
@@ -43,7 +38,6 @@ for (let i = 0; i < numbers.length; i++) {
         let flag = false;
         if (numbers[i][j] === null) continue;
 
-        // console.log(data[i].indexOf(numbers[i][j][0]));
         let currentNum = numbers[i][j];
         let firstColIndexNum = data[i].indexOf(currentNum[0], startsAt);
         let lastColIndexNum = firstColIndexNum + currentNum.length - 1;
@@ -51,12 +45,6 @@ for (let i = 0; i < numbers.length; i++) {
         startsAt = lastColIndexNum + 1;
 
         // check if the surrounding numbers are dots
-        // left
-        // console.log(data[i][firstColIndexNum - 1]);
-        // console.log(currentNum);
-
-
-
         // left
         if ((String(data[i][firstColIndexNum - 1]) !== '.')) {
             flag = true;
@@ -143,185 +131,137 @@ for (let i = 0; i < numbers.length; i++) {
             if ((String(data[i + 1][lastColIndexNum + 1]) !== '.')) {
                 flag = true;
             }
-
-
-
-
-
-
         }
 
-        if (!flag) {
-            console.log(currentNum);
+        if (flag) {
+            const num = parseInt(currentNum.join(''));
+            sum += num;
         }
-
-
-
     }
-
 }
 
+console.log(sum);
 
-// //top 
-// if (!(data[i - 1][firstColIndexNum] === '.')) {
-//     flag = true;
-// }
+// Part 2
+let gearRatioResult = 0;
+const findRestOfTheNumber = (i: number, j: number, direction: "left" | "right") => {
+    const num = [data[i][j]];
+    if (direction === "left") {
+        for (let k = j - 1; k >= 0; k--) {
+            if (isNaN(data[i][k])) {
+                break;
+            }
+            num.unshift(data[i][k]);
+        }
+    } else {
+        for (let k = j + 1; k < data[i].length; k++) {
+            if (isNaN(data[i][k])) {
+                break;
+            }
+            num.push(data[i][k]);
+        }
+    }
+    return num;
+}
 
-// // top left
-// if (!(data[i - 1][firstColIndexNum - 1] === '.')) {
-//     flag = true;
-// }
+const getRestOfTheNumber = (i: number, j: number) => {
+    const num = [data[i][j]];
+    // check right
+    for (let k = j + 1; k < data[i].length; k++) {
+        if (isNaN(data[i][k])) {
+            break;
+        }
+        num.push(data[i][k]);
+    }
 
-// // bottom
-// if (!(data[i + 1][firstColIndexNum] === '.')) {
-//     flag = true;
-// }
+    // check left
+    for (let k = j - 1; k >= 0; k--) {
+        if (isNaN(data[i][k])) {
+            break;
+        }
+        num.unshift(data[i][k]);
+    }
 
-// // bottom left
-// if (!(data[i + 1][firstColIndexNum - 1] === '.')) {
-//     flag = true;
-// }
+    return num;
+}
 
-// if (currentNum.length === 1) {
-//     // right
-//     if (!(data[i][lastColIndexNum + 1] === '.')) {
-//         flag = true;
-//     }
+for (let i = 0; i < data.length; i++) {
 
-//     // top right
-//     if (!(data[i - 1][lastColIndexNum + 1] === '.')) {
-//         flag = true;
-//     }
+    for (let j = 0; j < data[i].length; j++) {
+        let gearRatio = 0;
+        let testArray: number[] = [];
+        let number;
+        if (data[i][j] === '*') {
+            // check the surrounding 
+            // left
+            if (!isNaN(data[i][j - 1])) {
+                number = findRestOfTheNumber(i, j - 1, "left")
+                testArray.push(Number(number.join('')));
+            }
 
-//     // bottom right
-//     if (!(data[i + 1][lastColIndexNum + 1] === '.')) {
-//         flag = true;
-//     }
-// }
-
-
-// if (currentNum.length === 2) {
-//     // top
-//     if (!(data[i - 1][lastColIndexNum] === '.')) {
-//         flag = true;
-//     }
-//     // bottom
-//     if (!(data[i + 1][lastColIndexNum] === '.')) {
-//         flag = true;
-//     }
-//     if (!(data[i][lastColIndexNum + 1] === '.')) {
-//         flag = true;
-//     }
-
-//     // top right
-//     if (!(data[i - 1][lastColIndexNum + 1] === '.')) {
-//         flag = true;
-//     }
-
-//     // bottom right
-//     if (!(data[i + 1][lastColIndexNum + 1] === '.')) {
-//         flag = true;
-//     }
-// }
-
-// if (currentNum.length === 3) {
-//     // top
-//     if (!(data[i - 1][firstColIndexNum + 1] === '.')) {
-//         flag = true;
-//     }
-//     // bottom
-//     if (!(data[i + 1][firstColIndexNum + 1] === '.')) {
-//         flag = true;
-//     }
-
-//     // top
-//     if (!(data[i - 1][lastColIndexNum] === '.')) {
-//         flag = true;
-//     }
-//     // bottom
-//     if (!(data[i + 1][lastColIndexNum] === '.')) {
-//         flag = true;
-//     }
-
-//     // right
-//     if (!(data[i][lastColIndexNum + 1] === '.')) {
-//         flag = true;
-//     }
-
-//     // top right
-//     if (!(data[i - 1][lastColIndexNum + 1] === '.')) {
-//         flag = true;
-//     }
-
-//     // bottom right
-//     if (!(data[i + 1][lastColIndexNum + 1] === '.')) {
-//         flag = true;
-//     }
-
-// }
-
-// if (flag) {
-
-// } else {
-//     console.log(currentNum);
-// }
+            // right 
+            if (!isNaN(data[i][j + 1])) {
+                number = findRestOfTheNumber(i, j + 1, "right")
+                testArray.push(Number(number.join('')));
+            }
 
 
+            // top left
+            if (!isNaN(data[i - 1][j - 1])) {
+                number = getRestOfTheNumber(i - 1, j - 1);
+                testArray.push(Number(number.join('')));
+            }
 
-// } catch (error) {
-//     // console.log(undefined);
-// }
-// // top left
-// if (!data[firstRowIndexNum - 1][firstColIndexNum - 1] || data[firstRowIndexNum - 1][firstColIndexNum - 1] === '.') {
-//     flag = false;
-// } else {
-//     flag = true;
-// }
+            // top right
+            if (!isNaN(data[i - 1][j + 1])) {
+                number = getRestOfTheNumber(i - 1, j + 1);
+                testArray.push(Number(number.join('')));
+            }
 
-// // top
-// if (!data[firstRowIndexNum - 1][firstColIndexNum] || data[firstRowIndexNum - 1][firstColIndexNum] === '.') {
-//     flag = false;
-// } else {
-//     flag = true;
-// }
+            // bottom left
+            if (!isNaN(data[i + 1][j - 1])) {
+                number = getRestOfTheNumber(i + 1, j - 1);
+                testArray.push(Number(number.join('')));
+            }
 
-// // bottom left
-// if (!data[firstRowIndexNum + 1][firstColIndexNum - 1] || data[firstRowIndexNum + 1][firstColIndexNum - 1] === '.') {
-//     flag = false;
-// } else {
-//     flag = true;
-// }
+            // bottom right
+            if (!isNaN(data[i + 1][j + 1])) {
+                number = getRestOfTheNumber(i + 1, j + 1);
+                testArray.push(Number(number.join('')));
+            }
 
-// // bottom
-// if (!data[firstRowIndexNum + 1][firstColIndexNum] || data[firstRowIndexNum + 1][firstColIndexNum] === '.') {
-//     flag = false;
-// } else {
-//     flag = true;
-// }
+            // top
+            if (!isNaN(data[i - 1][j])) {
+                // check if three numbers are on left or right
+                number = getRestOfTheNumber(i - 1, j);
+                testArray.push(Number(number.join('')));
+            }
 
-
-
-
-// if (data[firstRowIndexNum - 1][firstColIndexNum] === '.' || null) continue;
-// if (data[firstRowIndexNum - 1][lastColIndexNum] === '.' || null) continue;
-
-
-
+            // bottom
+            if (!isNaN(data[i + 1][j])) {
+                // check if three numbers are on left or right
+                console.log()
+                number = getRestOfTheNumber(i + 1, j);
+                testArray.push(Number(number.join('')));
+            }
 
 
+            // delete duplicates
+            testArray = [...new Set(testArray)];
 
-// }
-
-
-// console.log(numbers[i]);
-// console.log(data[i].indexOf(numbers[i][0][0]));
-
-// console.log(i);
-// console.log(data[i]); // row
-
-// // console.log(numbers[i][0]); // number
+            if (testArray.length == 2) {
+                gearRatio = testArray[0] * testArray[1];
+                console.log(testArray);
+                console.log(gearRatio);
+            }
 
 
-// console.log(data[i].indexOf(numbers[i][0]));
+            gearRatioResult += gearRatio;
+            // find two numbers
 
-// }
+
+        }
+    }
+}
+
+console.log(gearRatioResult);
