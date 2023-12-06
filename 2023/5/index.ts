@@ -12,45 +12,78 @@ const temperatureToHumidity = data[6].split('\n').slice(1).map(line => line.spli
 const humidityToLocation = data[7].split('\n').slice(1).map(line => line.split(' ').map(Number));
 
 const procedures = [seedsToSoil, soilToFertilizer, fertilizerToWater, waterToLight, lightToTemperature, temperatureToHumidity, humidityToLocation];
-// const procedures = [seedsToSoil]
-// Part 1
-// create array of seed-to-soil
-const seedToSoilArray: number[][] = [];
-const soilAfterProcedure: number[][] = [];
 
+
+// Part 1
 function almanacListsProceed(procedures, seeds) {
     for (let i = 0; i < procedures.length; i++) {
         const procedure = procedures[i];
 
-        // const newSeeds: number[] = [
-        //     ...seeds,
-        // ];
-        // procedure.forEach((i) => {
+        for (let j = 0; j < seeds.length; j++) {
+            const seed = seeds[j];
 
-        //     for (let j = 0; j < seeds.length; j++) {
-        //         console.log(j, i);
-        //         let seedNr: number;
-        //         if (j >= i[1] && j <= i[1] + i[2] - 1) {
-        //             seedNr = j - (i[1] - i[0]);
-        //         } else {
-        //             seedNr = j;
-        //         }
-        //         newSeeds.push(seedNr);
-        //     }
-
-        //     seeds = newSeeds;
-        // });
-
-        while
-
-        // console.log(seeds);
+            for (let k = 0; k < procedure.length; k++) {
+                const line = procedure[k];
+                if (seed >= line[1] && seed <= line[1] + line[2] - 1) {
+                    const newSeed = seed - (line[1] - line[0]);
+                    // console.log(newSeed);
+                    seeds[j] = newSeed;
+                    continue;
+                }
+            }
+        }
+        // console.log(seeds, '----------------', procedure);
     }
 }
 
-// translate seeds to almanac procedure
 
 
+// `almanacListsProceed(procedures, seeds);
+// console.log(seeds);
+// console.log(seeds.sort((a, b) => a - b)[0]);`
 
-almanacListsProceed(procedures, seeds);
-// console.log(result.sort()[0]);
+// Part 2
+const seedRange = [];
+for (let i = 0; i < seeds.length; i += 2) {
+    const endSeed = seeds[i] + seeds[i + 1] - 1;
+    seedRange.push([seeds[i], endSeed]);
+}
 
+// console.log(seedRange);
+
+function findMinSeedRange(procedures, seeds) {
+    for (let i = 0; i < procedures.length; i++) {
+        const procedure = procedures[i];
+        for (let j = 0; j < procedure.length; j++) {
+            const [a, b, c] = procedure[j];
+            let newSeeds = [];
+            while (seeds.length > 0) {
+                const [startSeed, endSeed] = seeds[0];
+                seeds.shift();
+                const os = Math.max(startSeed, b);
+                const oe = Math.min(endSeed, b + c - 1);
+
+                if (os < oe) {
+                    const newSeed = [os - (b - a), oe - (b - a)];
+                    newSeeds.push(newSeed);
+
+                    if (os > startSeed) {
+                        seeds.push([startSeed, os]);
+                    }
+                    if (oe < endSeed) {
+                        seeds.push([oe, endSeed]);
+                    }
+                    continue;
+
+                } else {
+                    newSeeds.push([startSeed, endSeed]);
+                }
+            }
+            seeds = newSeeds;
+        }
+    }
+    return seeds.sort()
+}
+
+findMinSeedRange(procedures, seedRange);
+// console.log(seedRange)
